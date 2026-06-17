@@ -1,0 +1,103 @@
+# Canonical waste taxonomy for the E-Waste Scanner.
+#
+# `classes` is the single source of truth for the model's output space. The list
+# order IS the YOLO class id (Battery=0, Cardboard=1, ...). The reference tables
+# reference/materials_composition.csv and reference/impact_factors.csv are keyed
+# by these exact strings, so changing this list means updating those too.
+#
+# `aliases` maps lower-cased source labels (Kaggle folder names and the class
+# names used by Roboflow Universe datasets) onto a canonical class. Use this when
+# remapping/merging classes in Roboflow so an imported dataset speaks our
+# vocabulary. `ignore` lists source labels we deliberately drop because they have
+# no canonical home and no value/impact data.
+
+classes:
+  - Battery
+  - Cardboard
+  - Glass
+  - Keyboard
+  - Metal
+  - Microwave
+  - Mobile
+  - Mouse
+  - Organic
+  - Paper
+  - PCB
+  - Plastic
+  - Player
+  - Printer
+  - Television
+  - Trash
+  - Washing Machine
+
+aliases:
+  # --- Kaggle folder names (case/spacing normalised) ---
+  battery: Battery
+  cardboard: Cardboard
+  glass: Glass
+  keyboard: Keyboard
+  metal: Metal
+  microwave: Microwave
+  mobile: Mobile
+  mouse: Mouse
+  organic: Organic
+  paper: Paper
+  pcb: PCB
+  plastic: Plastic
+  player: Player
+  printer: Printer
+  television: Television
+  trash: Trash
+  washing machine: Washing Machine
+
+  # --- Common Roboflow Universe synonyms -> our taxonomy ---
+  smartphone: Mobile
+  smart phone: Mobile
+  phone: Mobile
+  cell phone: Mobile
+  mobile phone: Mobile
+  computer mouse: Mouse
+  printed circuit board: PCB
+  printed circuit board pcb: PCB
+  pcb board: PCB
+  motherboard: PCB
+  circuit board: PCB
+  9v battery: Battery
+  aa battery: Battery
+  car battery: Battery
+  batteries: Battery
+  tv: Television
+  flat-panel-tv: Television
+  monitor: Television
+  flat-panel-monitor: Television
+  media player: Player
+  mp3 player: Player
+  remote control: Player
+  remote: Player
+  computer keyboard: Keyboard
+  metal can: Metal
+  can: Metal
+  plastic bottle: Plastic
+  bottle: Glass
+  glass bottle: Glass
+
+# Source labels intentionally not part of our 17-class space. When importing a
+# Roboflow set, remap these to "ignore"/null so the model is not trained on
+# classes we cannot value. Extend as needed for the dataset you import.
+ignore:
+  - laptop
+  - desktop-pc
+  - desktop pc
+  - hdd
+  - internal hdd
+  - ram
+  - router
+  - networkswitch
+  - network switch
+  - usb flash drive
+  - usb
+  - cable
+  - power tools
+  - bulbs
+  - refrigerator
+  - refridgerators
