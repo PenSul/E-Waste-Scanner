@@ -70,11 +70,20 @@ class ScanService:
     def __init__(self, container: Container) -> None:
         self._c = container
 
-    def scan(self, image: Any) -> ScanResult:
-        """Detect, value, and score the contents of ``image``."""
+    def scan(self, image: Any, min_confidence: float | None = None) -> ScanResult:
+        """Detect, value, and score the contents of ``image``.
+
+        ``min_confidence`` overrides the configured detection floor for this
+        call (used by the UI's confidence slider); it is applied to both the
+        detector and the haul aggregation so the two never disagree.
+        """
         settings = self._c.settings
-        detections = self._c.detector.detect(image)
-        haul = Haul(detections, min_confidence=settings.min_confidence)
+        threshold = settings.min_confidence if min_confidence is None else min_confidence
+        detector = self._c.detector
+        if hasattr(detector, "min_confidence"):
+            detector.min_confidence = threshold
+        detections = detector.detect(image)
+        haul = Haul(detections, min_confidence=threshold)
         items = haul.items()
 
         compositions = self._c.materials.compositions()

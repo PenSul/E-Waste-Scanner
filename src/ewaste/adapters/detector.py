@@ -44,7 +44,7 @@ class YoloDetector(ObjectDetector):
         model_factory: Callable[[Path], Any] = _default_model_factory,
     ) -> None:
         self._weights = weights
-        self._min_confidence = min_confidence
+        self.min_confidence = min_confidence
         self._imgsz = imgsz
         self._device = device
         self._model_factory = model_factory
@@ -64,7 +64,7 @@ class YoloDetector(ObjectDetector):
         self.load()
         results = self._model.predict(
             image,
-            conf=self._min_confidence,
+            conf=self.min_confidence,
             imgsz=self._imgsz,
             device=self._device,
             verbose=False,
