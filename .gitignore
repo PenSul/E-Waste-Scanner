@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtual environments / uv
+.venv/
+venv/
+
+# uv: keep uv.lock committed for reproducible deploys; ignore the cache only
+.uv-cache/
+
+# Dataset (large / regenerable from Kaggle + Roboflow). See docs/labeling-guide.md.
+data/
+
+# Ultralytics training artifacts and auto-downloaded pretrained base weights.
+runs/
+/yolo11*.pt
+/yolov8*.pt
+*.onnx
+*.cache
+
+# Roboflow / training exports
+datasets/
+
+# NOTE: the final deployed weights under models/ (e.g. models/best.pt) ARE tracked
+# on purpose so Streamlit Community Cloud can load them. Keep them small (YOLO11s/n).
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Streamlit secrets
+.streamlit/secrets.toml
+
+# OS / editor
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Environment
+.env
