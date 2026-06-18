@@ -39,7 +39,9 @@ upload-and-wait flow). It is trained by `scripts/train.py` (default
 YOLO11n exists for the case where the container OOMs under load: the same
 training and export scripts produce it via `--model yolo11n.pt`, and swapping the
 deployed weights is a one-file change with no code change, because `YoloDetector`
-reads class names and geometry from the checkpoint itself.
+reads class names and geometry from the checkpoint itself. It is trained,
+evaluated, and committed to `models/best-nano.pt` (5.3 MB); deploy it by pointing
+`EWASTE_WEIGHTS` at that file or replacing `models/best.pt` with it.
 
 Training configuration (see `scripts/train.py` for the full set): fine-tune the
 pretrained COCO checkpoint at `imgsz=640`, mosaic=1.0 and mixup=0.1 to synthesise
@@ -59,7 +61,10 @@ stopped at epoch 88 of a 100-epoch budget.
   intentionally git-tracked); no Git LFS or release-asset step is needed.
 * Choosing `s` over `n` trades some headroom for accuracy. If the live container
   proves memory-tight, the nano fallback is the first lever, ahead of any code
-  change.
+  change — and it costs little accuracy: on the test split YOLO11n reaches
+  **mAP50 0.730 / mAP50-95 0.687** (versus 0.738 / 0.694 for `s`) at roughly a
+  third of the parameters and a 5.3 MB checkpoint. It was trained on the same
+  data and early-stopped once it had converged.
 * Accuracy on the generic material classes is data-bound, not model-bound:
   improving those rows (more cluttered real-scene labels, cleaner class
   boundaries) is higher-leverage than scaling the model up — which the runtime

@@ -47,12 +47,14 @@ unit-testable without a model, a network, or any mocks.
 
 The deployed detector is **YOLO11s** (Ultralytics), fine-tuned for 88 epochs
 (early-stopped from a 100-epoch budget). On the held-out test split it reaches
-**mAP50 0.738 / mAP50-95 0.694**. **YOLO11n** is kept as a smaller out-of-memory
-fallback. The rationale and full per-class results are recorded in
+**mAP50 0.738 / mAP50-95 0.694**. A smaller **YOLO11n** out-of-memory fallback is
+also trained and committed (**mAP50 0.730 / mAP50-95 0.687** at a third the
+parameters). The rationale and full per-class results are recorded in
 [ADR-0001](docs/adr/0001-model-architecture-and-size.md).
 
-Weights are committed to the repository at `models/best.pt` (about 19 MB) and
-loaded lazily on first request.
+Weights are committed to the repository and loaded lazily on first request:
+`models/best.pt` (the deployed YOLO11s, about 19 MB) and `models/best-nano.pt`
+(the YOLO11n fallback, about 5 MB).
 
 ## Estimation methodology
 
@@ -165,10 +167,10 @@ To deploy:
 3. Community Cloud installs from `app/requirements.txt` plus `packages.txt` and
    serves the app.
 
-If the container runs short of memory under load, swap to the nano fallback:
-point `EWASTE_WEIGHTS` at a nano `best.pt`, or replace `models/best.pt` with the
-nano export. No code change is required, because the detector reads its class map
-and geometry from the checkpoint itself.
+If the container runs short of memory under load, swap to the committed nano
+fallback: set `EWASTE_WEIGHTS` to `models/best-nano.pt`, or replace
+`models/best.pt` with it. No code change is required, because the detector reads
+its class map and geometry from the checkpoint itself.
 
 ## Configuration
 
