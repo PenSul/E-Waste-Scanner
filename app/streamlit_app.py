@@ -15,8 +15,13 @@ import streamlit as st
 from PIL import Image
 
 # Ensure both the app components and the src package are importable when run via
-# `streamlit run app/streamlit_app.py`.
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+# `streamlit run app/streamlit_app.py`. Locally the project is pip-installed
+# (editable, src layout) so `ewaste` resolves anyway, but on Streamlit Community
+# Cloud only the third-party requirements are installed and the repo code is just
+# cloned -- so `src/` must be put on the path explicitly here.
+_APP_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(_APP_DIR))
+sys.path.insert(0, str(_APP_DIR.parent / "src"))
 
 from components import dashboard, overlay  # noqa: E402
 
