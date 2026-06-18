@@ -1,0 +1,11 @@
+material,lca_energy_mj_per_kg,lca_co2e_kg_per_kg,fallback_usd_per_gram,priced,source
+gold,208000,12500,85,true,NussEckelman2014
+silver,1300,196,1.0,true,NussEckelman2014
+palladium,70000,3880,35,true,NussEckelman2014
+platinum,250000,12500,32,true,NussEckelman2014
+copper,45,3.0,0.0095,true,NussEckelman2014
+aluminum,200,9.0,0.0025,true,IAI_ecoinvent
+ferrous,15,1.5,0.0004,true,worldsteel
+plastic,60,1.8,0,false,ecoinvent
+glass,6,0.3,0,false,ecoinvent
+other,0,0,0,false,EST

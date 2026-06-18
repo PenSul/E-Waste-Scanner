@@ -1,0 +1,18 @@
+waste_class,warm_co2e_kg_per_kg,recyclable,source
+Battery,0.8,true,WARM_mixed
+Cardboard,3.46,true,WARM_corrugated
+Glass,0.31,true,WARM_glass
+Keyboard,1.3,true,WARM_electronics
+Metal,4.5,true,WARM_metals
+Microwave,1.5,true,WARM_electronics_steel
+Mobile,1.3,true,WARM_electronics
+Mouse,1.3,true,WARM_electronics
+Organic,0.5,true,WARM_food
+Paper,3.5,true,WARM_mixedpaper
+PCB,1.5,true,WARM_electronics
+Plastic,1.1,true,WARM_plastics
+Player,1.3,true,WARM_electronics
+Printer,1.5,true,WARM_electronics_steel
+Television,1.0,true,WARM_electronics
+Trash,0.0,false,nonrecoverable
+Washing Machine,1.6,true,WARM_steel

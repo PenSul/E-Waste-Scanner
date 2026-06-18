@@ -19,13 +19,15 @@ data/
 
 # Ultralytics training artifacts and auto-downloaded pretrained base weights.
 runs/
-/yolo11*.pt
-/yolov8*.pt
+runs_*.log
+/yolo*.pt
 *.onnx
 *.cache
 
-# Roboflow / training exports
+# Roboflow / training exports, and the data.yaml generated from a local export
+# (it stores an absolute path into the git-ignored datasets/ dir).
 datasets/
+/data.yaml
 
 # NOTE: the final deployed weights under models/ (e.g. models/best.pt) ARE tracked
 # on purpose so Streamlit Community Cloud can load them. Keep them small (YOLO11s/n).
