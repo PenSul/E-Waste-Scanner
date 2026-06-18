@@ -3,7 +3,8 @@
 Reads the top-level ``data.yaml`` produced by ``scripts/prepare_data.py`` and
 fine-tunes a pretrained YOLO11 checkpoint. We deploy **YOLO11s** (the accuracy/
 size balance that fits Streamlit Community Cloud's 1 GB, CPU-only runtime) and
-keep **YOLO11n** as an out-of-memory fallback (see ``docs/adr/0001-model-choice.md``).
+keep **YOLO11n** as an out-of-memory fallback (see
+``docs/adr/0001-model-architecture-and-size.md``).
 
 The dataset is single-object Kaggle crops plus real multi-object scenes; mosaic
 and a little mixup synthesise extra clutter so the model generalises to messy
