@@ -14,7 +14,7 @@ venv/
 # uv: keep uv.lock committed for reproducible deploys; ignore the cache only
 .uv-cache/
 
-# Dataset (large / regenerable from Kaggle + Roboflow). See docs/labeling-guide.md.
+# Dataset (large / regenerable from Kaggle + Roboflow).
 data/
 
 # Ultralytics training artifacts and auto-downloaded pretrained base weights.
@@ -49,3 +49,10 @@ coverage.xml
 
 # Environment
 .env
+
+# Local-only docs: kept on disk for development, not published to GitHub.
+# (Agent config, architecture decision records, domain glossary, labeling guide.)
+/CLAUDE.md
+/CONTEXT.md
+/docs/adr/
+/docs/labeling-guide.md

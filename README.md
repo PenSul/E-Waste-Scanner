@@ -49,8 +49,7 @@ The deployed detector is **YOLO11s** (Ultralytics), fine-tuned for 88 epochs
 (early-stopped from a 100-epoch budget). On the held-out test split it reaches
 **mAP50 0.738 / mAP50-95 0.694**. A smaller **YOLO11n** out-of-memory fallback is
 also trained and committed (**mAP50 0.730 / mAP50-95 0.687** at a third the
-parameters). The rationale and full per-class results are recorded in
-[ADR-0001](docs/adr/0001-model-architecture-and-size.md).
+parameters).
 
 Weights are committed to the repository and loaded lazily on first request:
 `models/best.pt` (the deployed YOLO11s, about 19 MB) and `models/best-nano.pt`
@@ -71,8 +70,7 @@ the detected count, fed by cited reference tables in `reference/`:
 3. **WEEE-LCA energy and CO2 avoided.** A bottom-up estimate from recovered
    grams times the primary-production burden avoided per kg.
 
-The full reasoning is in [ADR-0002](docs/adr/0002-valuation-and-impact-methodology.md),
-and every figure in the reference tables is cited in `reference/SOURCES.md`.
+Every figure in the reference tables is cited in `reference/SOURCES.md`.
 
 ## Project structure
 
@@ -91,9 +89,7 @@ app/
 reference/       # class_map.yaml + cited composition / impact CSVs + SOURCES.md
 scripts/         # prepare_data.py, train.py, evaluate.py
 models/          # best.pt (deployed weights, tracked in git)
-docs/adr/        # architecture decision records
 tests/           # unit + integration tests
-CONTEXT.md       # bounded-context and ubiquitous-language reference
 ```
 
 ## Local development
@@ -127,9 +123,6 @@ uv run --extra gpu python scripts/evaluate.py \
     --weights runs/detect/ewaste-yolo11s/weights/best.pt --split test
 ```
 
-Data preparation, labeling, and the Roboflow workflow are documented in
-`docs/labeling-guide.md`.
-
 ## Testing
 
 ```bash
@@ -140,39 +133,15 @@ The suite covers the domain maths, the adapters (with the network and the model
 faked), the full scan pipeline, and a headless render of the Streamlit page via
 `streamlit.testing.v1.AppTest`.
 
-## Deployment (Streamlit Community Cloud)
+## Try it online
 
-Community Cloud provides roughly 1 GB of RAM and is CPU-only, so the deployment
-must use the CPU build of PyTorch. The CUDA build that PyPI ships for Linux would
-risk running out of memory.
+A hosted demo runs on Streamlit Community Cloud's free tier:
+**https://e-waste-scanner-aaf8pq3fnphvhbbhxjdydy.streamlit.app/**
 
-Two files configure the deployment:
-
-- `app/requirements.txt` pins the Python dependencies, including the CPU-only
-  torch and torchvision wheels referenced by direct URL. Community Cloud searches
-  the entrypoint's directory before the repository root and uses the first
-  dependency file it finds, so this file is used in preference to the root
-  `uv.lock` (whose torch lives behind the `cpu`/`gpu` extras and has no default).
-  It resolves identically under uv and pip.
-- `packages.txt` (repo root) installs the system libraries that ultralytics'
-  opencv dependency needs at import time and that the container does not ship by
-  default: `libgl1` (for `libGL.so.1`) and `libglib2.0-0t64` (for
-  `libgthread-2.0.so.0`). The `t64` suffix matches Community Cloud's Debian
-  trixie base image, where the old `libglib2.0-0` name is not installable.
-
-To deploy:
-
-1. Push the repository to GitHub (it must be public for the free tier).
-2. On [share.streamlit.io](https://share.streamlit.io), create an app pointing at
-   `app/streamlit_app.py` and select **Python 3.12** (the pinned torch wheels are
-   built for cp312 / 64-bit Linux).
-3. Community Cloud installs from `app/requirements.txt` plus `packages.txt` and
-   serves the app.
-
-If the container runs short of memory under load, swap to the committed nano
-fallback: set `EWASTE_WEIGHTS` to `models/best-nano.pt`, or replace
-`models/best.pt` with it. No code change is required, because the detector reads
-its class map and geometry from the checkpoint itself.
+The free tier is tightly memory-constrained, so the demo serves the smaller
+YOLO11n model and can be slow or briefly unavailable under load. Treat it as a
+rough preview, not a showcase of the detector's accuracy — run it locally (see
+above) for the full YOLO11s model.
 
 ## Configuration
 
@@ -183,6 +152,4 @@ Settings have sensible defaults and can be overridden by environment variables:
 
 ## Further reading
 
-- `CONTEXT.md` — bounded context and ubiquitous language.
-- `docs/adr/` — architecture decision records (model, methodology, environment).
 - `reference/SOURCES.md` — citations for every composition and impact figure.
