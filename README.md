@@ -154,9 +154,11 @@ Two files configure the deployment:
   dependency file it finds, so this file is used in preference to the root
   `uv.lock` (whose torch lives behind the `cpu`/`gpu` extras and has no default).
   It resolves identically under uv and pip.
-- `packages.txt` (repo root) installs the system library `libgl1` that
-  ultralytics' opencv dependency needs at import time and that the container does
-  not ship by default.
+- `packages.txt` (repo root) installs the system libraries that ultralytics'
+  opencv dependency needs at import time and that the container does not ship by
+  default: `libgl1` (for `libGL.so.1`) and `libglib2.0-0t64` (for
+  `libgthread-2.0.so.0`). The `t64` suffix matches Community Cloud's Debian
+  trixie base image, where the old `libglib2.0-0` name is not installable.
 
 To deploy:
 
