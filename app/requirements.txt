@@ -1,0 +1,37 @@
+# Streamlit Community Cloud dependency file (CPU-only deployment).
+#
+# Community Cloud scans the entrypoint's directory (this app/ folder) for a
+# dependency file BEFORE the repository root, so this file is what the hosted
+# build uses -- not the root uv.lock. That is deliberate: the root project keeps
+# torch behind mutually exclusive `cpu`/`gpu` extras with no default (see
+# pyproject.toml), which is ideal for local dev but has no single "just install
+# it" path for the cloud. This file provides that path.
+#
+# torch / torchvision are referenced by DIRECT URL to the CPU wheels from
+# PyTorch's index, rather than via `--extra-index-url`. The extra-index approach
+# makes the PyTorch index a candidate for every package, which uv (the resolver
+# Community Cloud tries first) refuses to mix with PyPI by default. Direct URLs
+# sidestep that entirely and resolve identically under both uv and pip, while the
+# CPU build keeps the running app inside Community Cloud's ~1 GB memory limit.
+#
+# The wheels are cp312 / manylinux x86_64 -- exactly Community Cloud's runtime
+# (Python 3.12, 64-bit Linux). Deploy with Python 3.12. opencv's native libGL is
+# supplied by the repo-root packages.txt.
+#
+# Versions mirror the uv.lock-resolved set the test suite runs against; bump them
+# here and in uv.lock together.
+torch @ https://download.pytorch.org/whl/cpu/torch-2.12.0%2Bcpu-cp312-cp312-manylinux_2_28_x86_64.whl
+torchvision @ https://download.pytorch.org/whl/cpu/torchvision-0.27.0%2Bcpu-cp312-cp312-manylinux_2_28_x86_64.whl
+
+ultralytics==8.4.69
+streamlit==1.58.0
+yfinance==1.4.1
+pandas==3.0.3
+pillow==12.2.0
+# ultralytics hard-requires opencv-python (the GUI build), so pinning the headless
+# variant does not stop it being pulled in. Pin the GUI build we tested and supply
+# its native libGL via packages.txt instead.
+opencv-python==4.13.0.92
+pyyaml==6.0.3
+numpy==2.4.6
+requests==2.34.2
