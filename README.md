@@ -49,15 +49,20 @@ unit-testable without a model, a network, or any mocks.
 
 ## Model and accuracy
 
-The deployed detector is **YOLO11s** (Ultralytics), fine-tuned for 88 epochs
-(early-stopped from a 100-epoch budget). On the held-out test split it reaches
-**mAP50 0.738 / mAP50-95 0.694**. A smaller **YOLO11n** out-of-memory fallback is
-also trained and committed (**mAP50 0.730 / mAP50-95 0.687** at a third the
-parameters).
+The deployed detector is **YOLO11s** (Ultralytics), fine-tuned for 50 epochs at
+960px on a dataset whose cluttered, multi-object scenes are oversampled to close
+the single-object-to-pile domain gap. On the held-out test split it reaches
+**mAP50 0.947 / mAP50-95 0.913**.
+
+Dense piles remain the hard case: most training images are single, centred
+objects, so recall on small items buried in clutter is limited. Tiled inference
+(see [Configuration](#configuration)) mitigates this, and the durable improvement
+is more varied, fully-labelled pile photos.
 
 Weights are committed to the repository and loaded lazily on first request:
-`models/best.pt` (the deployed YOLO11s, about 19 MB) and `models/best-nano.pt`
-(the YOLO11n fallback, about 5 MB).
+`models/best.pt` is the deployed YOLO11s (about 19 MB). `models/best-nano.pt` is
+the checkpoint the memory-constrained cloud demo loads; it is currently the same
+YOLO11s weights rather than a separate smaller model.
 
 ## Estimation methodology
 
@@ -116,15 +121,15 @@ uv run --extra cpu streamlit run app/streamlit_app.py
 ## Training and evaluation
 
 ```bash
-# Fine-tune YOLO11s on the prepared dataset (expects data.yaml from prepare_data.py):
-uv run --extra gpu python scripts/train.py --model yolo11s.pt --epochs 100
+# (Optional) oversample cluttered pile scenes to weight them in training:
+uv run --extra cpu python scripts/oversample_clutter.py --multiplier 30
 
-# Train the nano fallback:
-uv run --extra gpu python scripts/train.py --model yolo11n.pt --name ewaste-yolo11n
+# Fine-tune YOLO11s on the prepared dataset (expects data.yaml from prepare_data.py):
+uv run --extra gpu python scripts/train.py --model yolo11s.pt --epochs 50 --imgsz 960
 
 # Evaluate on the test split and export deployment weights to models/best.pt:
 uv run --extra gpu python scripts/evaluate.py \
-    --weights runs/detect/ewaste-yolo11s/weights/best.pt --split test
+    --weights runs/detect/ewaste-yolo11s/weights/best.pt --split test --imgsz 960
 ```
 
 ## Testing
@@ -142,10 +147,10 @@ faked), the full scan pipeline, and a headless render of the Streamlit page via
 A hosted demo runs on Streamlit Community Cloud's free tier:
 **https://e-waste-scanner-aaf8pq3fnphvhbbhxjdydy.streamlit.app/**
 
-The free tier is tightly memory-constrained, so the demo serves the smaller
-YOLO11n model and can be slow or briefly unavailable under load. Treat it as a
-rough preview, not a showcase of the detector's accuracy — run it locally (see
-above) for the full YOLO11s model.
+The free tier is tightly memory-constrained, so the hosted demo can be slow or
+briefly unavailable under load and may run at a reduced inference resolution.
+Treat it as a rough preview — run it locally (see above) for the best results,
+where you can raise the resolution and enable tiled inference.
 
 ## Configuration
 

@@ -26,8 +26,8 @@ class Settings:
 
     reference_dir: Path = REPO_ROOT / "reference"
     weights_path: Path = REPO_ROOT / "models" / "best.pt"
-    min_confidence: float = 0.25
-    imgsz: int = 640
+    min_confidence: float = 0.15
+    imgsz: int = 1280
     device: str = "cpu"
     price_ttl_seconds: int = 3600
     #: Tiled (SAHI-style) inference: slice the image into overlapping windows,
@@ -35,7 +35,7 @@ class Settings:
     #: so it suits local high-recall runs on dense piles, not the memory-tight
     #: Community Cloud deployment.
     tiled: bool = False
-    tile_size: int = 640
+    tile_size: int = 2048
     tile_overlap: float = 0.2
     tile_iou: float = 0.45
 
