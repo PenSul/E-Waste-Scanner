@@ -48,6 +48,8 @@ def main() -> None:
     service = get_service()
     settings = service._c.settings  # noqa: SLF001 (entrypoint reads its own wiring)
 
+    res_options = [640, 960, 1280, 1536, 2048]
+    tile_options = [512, 640, 1024, 1536, 2048]
     with st.sidebar:
         st.header("Settings")
         min_conf = st.slider(
@@ -56,9 +58,42 @@ def main() -> None:
             max_value=0.90,
             value=float(settings.min_confidence),
             step=0.05,
-            help="Minimum confidence for a detection to be counted.",
+            help="Minimum confidence for a detection to be counted. Lower it for "
+            "dense piles to trade precision for recall.",
         )
+        imgsz = st.select_slider(
+            "Inference resolution",
+            options=res_options,
+            value=settings.imgsz if settings.imgsz in res_options else 1280,
+            help="Higher resolution finds smaller objects but is slower and uses "
+            "more memory.",
+        )
+        tiled = st.checkbox(
+            "Tiled inference (dense piles)",
+            value=settings.tiled,
+            help="Slice the image into overlapping windows, detect in each, and "
+            "merge. Greatly raises recall on small objects in clutter, at the "
+            "cost of running inference once per tile.",
+        )
+        tile_size = settings.tile_size
+        if tiled:
+            tile_size = st.select_slider(
+                "Tile size (px)",
+                options=tile_options,
+                value=settings.tile_size if settings.tile_size in tile_options else 1024,
+                help="Smaller tiles magnify small objects more; larger tiles keep "
+                "more context. A tile at or above the image size is one "
+                "high-resolution pass.",
+            )
         st.caption(f"Model weights: {settings.weights_path.name}")
+
+    # Apply the UI inference choices to the cached detector before scanning. The
+    # detector reads these attributes at detection time, so mutating them here is
+    # the same per-call override pattern the scan service uses for confidence.
+    detector = service._c.detector  # noqa: SLF001 (entrypoint reads its own wiring)
+    for attr, value in (("imgsz", imgsz), ("tiled", tiled), ("tile_size", tile_size)):
+        if hasattr(detector, attr):
+            setattr(detector, attr, value)
 
     weights_ready = settings.weights_path.exists()
     if not weights_ready:

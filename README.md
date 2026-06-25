@@ -151,8 +151,18 @@ above) for the full YOLO11s model.
 
 Settings have sensible defaults and can be overridden by environment variables:
 `EWASTE_WEIGHTS` (path to the model checkpoint), `EWASTE_REFERENCE_DIR`,
-`EWASTE_MIN_CONFIDENCE`, `EWASTE_DEVICE`, and `EWASTE_PRICE_TTL`. See
+`EWASTE_MIN_CONFIDENCE`, `EWASTE_IMGSZ` (inference resolution; match it to the
+training image size), `EWASTE_DEVICE`, and `EWASTE_PRICE_TTL`. See
 `src/ewaste/config.py`.
+
+For dense piles, tiled (SAHI-style) inference raises recall on small objects by
+slicing the image into overlapping windows, detecting in each, and merging:
+`EWASTE_TILED` (`1` to enable; off by default), `EWASTE_TILE_SIZE` (window size
+in pixels, default 640), `EWASTE_TILE_OVERLAP` (fractional overlap, default 0.2),
+and `EWASTE_TILE_IOU` (merge threshold, default 0.45). It runs inference once per
+tile, so it is intended for local use, not the memory-constrained cloud demo. The
+Streamlit sidebar also exposes the inference resolution and the tiling toggle, so
+they can be tuned per session without setting environment variables.
 
 ## Further reading
 

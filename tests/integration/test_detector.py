@@ -76,6 +76,42 @@ def test_detect_maps_boxes_to_canonical_detections():
     assert detections[0].bbox == (10.0, 20.0, 30.0, 40.0)
 
 
+class _CountingModel:
+    """Records how many windows it was asked to predict on."""
+
+    names = {0: "PCB"}
+
+    def __init__(self) -> None:
+        self.predict_calls = 0
+
+    def predict(self, image, **kwargs):  # noqa: ANN001, D401
+        self.predict_calls += 1
+        # One detection near the centre of whatever window it is given.
+        return [_FakeResult([_FakeBox(0, 0.80, [5.0, 5.0, 15.0, 15.0])])]
+
+
+def test_tiled_inference_slices_and_offsets_boxes():
+    from PIL import Image
+
+    model = _CountingModel()
+    detector = YoloDetector(
+        Path("unused.pt"),
+        tiled=True,
+        tile_size=100,
+        tile_overlap=0.0,
+        model_factory=lambda _w: model,
+    )
+    # 200x100 image with 100px tiles, no overlap -> 2 tiles + 1 full pass = 3.
+    image = Image.new("RGB", (200, 100))
+    detections = detector.detect(image)
+
+    assert model.predict_calls == 3  # 2 tiles + 1 full-frame pass
+    # Tile 1 and the full-frame pass both yield a box at x=5 (identical, so NMS
+    # merges them); tile 2's box is offset by +100. Two detections survive.
+    xs = sorted(round(d.bbox[0]) for d in detections)
+    assert xs == [5, 105]
+
+
 def test_model_is_loaded_lazily_and_once():
     factory_calls: list[Path] = []
 
