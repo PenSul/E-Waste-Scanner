@@ -55,6 +55,10 @@ def build(settings: Settings | None = None) -> Container:
         min_confidence=settings.min_confidence,
         imgsz=settings.imgsz,
         device=settings.device,
+        tiled=settings.tiled,
+        tile_size=settings.tile_size,
+        tile_overlap=settings.tile_overlap,
+        tile_iou=settings.tile_iou,
     )
 
     return Container(

@@ -49,15 +49,20 @@ unit-testable without a model, a network, or any mocks.
 
 ## Model and accuracy
 
-The deployed detector is **YOLO11s** (Ultralytics), fine-tuned for 88 epochs
-(early-stopped from a 100-epoch budget). On the held-out test split it reaches
-**mAP50 0.738 / mAP50-95 0.694**. A smaller **YOLO11n** out-of-memory fallback is
-also trained and committed (**mAP50 0.730 / mAP50-95 0.687** at a third the
-parameters).
+The deployed detector is **YOLO11s** (Ultralytics), fine-tuned for 50 epochs at
+960px on a dataset whose cluttered, multi-object scenes are oversampled to close
+the single-object-to-pile domain gap. On the held-out test split it reaches
+**mAP50 0.947 / mAP50-95 0.913**.
+
+Dense piles remain the hard case: most training images are single, centred
+objects, so recall on small items buried in clutter is limited. Tiled inference
+(see [Configuration](#configuration)) mitigates this, and the durable improvement
+is more varied, fully-labelled pile photos.
 
 Weights are committed to the repository and loaded lazily on first request:
-`models/best.pt` (the deployed YOLO11s, about 19 MB) and `models/best-nano.pt`
-(the YOLO11n fallback, about 5 MB).
+`models/best.pt` is the deployed YOLO11s (about 19 MB). `models/best-nano.pt` is
+the checkpoint the memory-constrained cloud demo loads; it is currently the same
+YOLO11s weights rather than a separate smaller model.
 
 ## Estimation methodology
 
@@ -116,15 +121,15 @@ uv run --extra cpu streamlit run app/streamlit_app.py
 ## Training and evaluation
 
 ```bash
-# Fine-tune YOLO11s on the prepared dataset (expects data.yaml from prepare_data.py):
-uv run --extra gpu python scripts/train.py --model yolo11s.pt --epochs 100
+# (Optional) oversample cluttered pile scenes to weight them in training:
+uv run --extra cpu python scripts/oversample_clutter.py --multiplier 30
 
-# Train the nano fallback:
-uv run --extra gpu python scripts/train.py --model yolo11n.pt --name ewaste-yolo11n
+# Fine-tune YOLO11s on the prepared dataset (expects data.yaml from prepare_data.py):
+uv run --extra gpu python scripts/train.py --model yolo11s.pt --epochs 50 --imgsz 960
 
 # Evaluate on the test split and export deployment weights to models/best.pt:
 uv run --extra gpu python scripts/evaluate.py \
-    --weights runs/detect/ewaste-yolo11s/weights/best.pt --split test
+    --weights runs/detect/ewaste-yolo11s/weights/best.pt --split test --imgsz 960
 ```
 
 ## Testing
@@ -142,17 +147,27 @@ faked), the full scan pipeline, and a headless render of the Streamlit page via
 A hosted demo runs on Streamlit Community Cloud's free tier:
 **https://e-waste-scanner-aaf8pq3fnphvhbbhxjdydy.streamlit.app/**
 
-The free tier is tightly memory-constrained, so the demo serves the smaller
-YOLO11n model and can be slow or briefly unavailable under load. Treat it as a
-rough preview, not a showcase of the detector's accuracy — run it locally (see
-above) for the full YOLO11s model.
+The free tier is tightly memory-constrained, so the hosted demo can be slow or
+briefly unavailable under load and may run at a reduced inference resolution.
+Treat it as a rough preview — run it locally (see above) for the best results,
+where you can raise the resolution and enable tiled inference.
 
 ## Configuration
 
 Settings have sensible defaults and can be overridden by environment variables:
 `EWASTE_WEIGHTS` (path to the model checkpoint), `EWASTE_REFERENCE_DIR`,
-`EWASTE_MIN_CONFIDENCE`, `EWASTE_DEVICE`, and `EWASTE_PRICE_TTL`. See
+`EWASTE_MIN_CONFIDENCE`, `EWASTE_IMGSZ` (inference resolution; match it to the
+training image size), `EWASTE_DEVICE`, and `EWASTE_PRICE_TTL`. See
 `src/ewaste/config.py`.
+
+For dense piles, tiled (SAHI-style) inference raises recall on small objects by
+slicing the image into overlapping windows, detecting in each, and merging:
+`EWASTE_TILED` (`1` to enable; off by default), `EWASTE_TILE_SIZE` (window size
+in pixels, default 640), `EWASTE_TILE_OVERLAP` (fractional overlap, default 0.2),
+and `EWASTE_TILE_IOU` (merge threshold, default 0.45). It runs inference once per
+tile, so it is intended for local use, not the memory-constrained cloud demo. The
+Streamlit sidebar also exposes the inference resolution and the tiling toggle, so
+they can be tuned per session without setting environment variables.
 
 ## Further reading
 
