@@ -1,8 +1,6 @@
 # E-Waste Scanner
 
-
-https://github.com/user-attachments/assets/488bd896-72e4-4178-b295-f4c7f90d6200
-
+https://github.com/user-attachments/assets/25b3ffb6-f486-4960-af52-62080bb56956
 
 Upload a photo of a junk pile, drawer, or messy desk. The application detects
 electronic waste and mixed materials with a YOLO11 object detector, draws
